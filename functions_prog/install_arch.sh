@@ -46,23 +46,14 @@ configure_network() {
   echo "Fichiers de configuration réseau existants :"
   ls /etc/systemd/network/*.network 2>/dev/null | nl
 
-  # Demander à l'utilisateur de choisir ou de saisir un nouveau nom de fichier
-  read -p "Veuillez choisir un fichier de configuration existant (numéro) ou entrez un nouveau nom (sans extension) [ex: 20-wired] : " CONFIG_CHOICE
+  # Nom du fichier réseau dans le système live et installé
+  CONFIG_FILE="/etc/systemd/network/20-$INTERFACE.network"
+  CONFIG_FILE_MNT="/mnt/etc/systemd/network/20-$INTERFACE.network"
 
-  if [[ "$CONFIG_CHOICE" =~ ^[0-9]+$ ]]; then
-    CONFIG_FILE=$(ls /etc/systemd/network/*.network 2>/dev/null | sed -n "${CONFIG_CHOICE}p")
-    if [ -z "$CONFIG_FILE" ]; then
-      echo "Erreur : Numéro de fichier non valide."
-      exit 1
-    fi
-  else
-    CONFIG_FILE="/etc/systemd/network/${CONFIG_CHOICE}.network"
-  fi
-
-  # Créer la configuration réseau statique ou DHCP
+  # Créer la configuration réseau
   if [ "$FC_USE_DHCP" = true ]; then
     echo "Utilisation de DHCP sur l'interface $INTERFACE"
-    cat <<EOF > "$CONFIG_FILE"
+    cat <<EOF | tee "$CONFIG_FILE" "$CONFIG_FILE_MNT"
 [Match]
 Name=$INTERFACE
 
@@ -71,7 +62,7 @@ DHCP=yes
 EOF
   else
     echo "Configuration manuelle du réseau sur l'interface $INTERFACE"
-    cat <<EOF > "$CONFIG_FILE"
+    cat <<EOF | tee "$CONFIG_FILE" "$CONFIG_FILE_MNT"
 [Match]
 Name=$INTERFACE
 
@@ -82,16 +73,16 @@ DNS=$FC_DNS
 EOF
   fi
 
-  # Redémarrer systemd-networkd et systemd-resolved
+  # Redémarrer systemd-networkd et systemd-resolved dans l'environnement live
   systemctl restart systemd-networkd.service
   systemctl restart systemd-resolved.service
-  
+
   echo "Test de connexion à Internet ..."
   ping -c 4 8.8.8.8
   ping -c 4 google.com
-  
+
   echo "Configuration du réseau terminée."
-  echo "Appuyez sur Entrée pour continuer ou Ctrl+C pour quitter ()"
+  echo "Appuyez sur Entrée pour continuer ou Ctrl+C pour quitter"
   read
 }
 
@@ -180,7 +171,7 @@ configure_system() {
   # Configurer le mot de passe root
   echo "root:$root_password" | arch-chroot /mnt chpasswd
 
-  # Chroot dans l'installation Arch
+  # Configuration générale du système
   arch-chroot /mnt /bin/bash <<EOF
 set -e
 
@@ -191,7 +182,7 @@ hwclock --systohc
 # Configurer la langue et le clavier
 echo "$FC_LOCALE" > /etc/locale.gen
 locale-gen
-echo "FC_LANG=$LANG" > /etc/locale.conf
+echo "LANG=$FC_LANG" > /etc/locale.conf
 echo "KEYMAP=$FC_KEYMAP" > /etc/vconsole.conf
 
 # Ajouter le nom d'hôte
@@ -210,27 +201,14 @@ echo "$FC_COLOR_LS_GREP" >> /etc/bash.bashrc
 # Personnaliser les couleurs pour nano
 echo "$FC_COLOR_NANO_BASH" >> /etc/nanorc
 
-# Configuration réseau
-echo "[Match]
-Name=$FC_NIC
-[Network]
-Address=$FC_IP_ADDRESS/$FC_CIDR
-Gateway=$FC_GATEWAY
-DNS=$FC_DNS" > /mnt/etc/systemd/network/$FC_NIC.network
-
 # Activer les services au démarrage
 systemctl enable systemd-networkd.service
 systemctl enable systemd-resolved.service
 systemctl enable sshd.service
 
-# Redémarrer les services
-systemctl restart systemd-networkd.service
-systemctl restart systemd-resolved.service
-systemctl restart sshd.service
-
 # Intégrer Archlinux-Manager en tant que commande
-git clone https://github.com/KMontasir/archlinux_manager.git /mnt/root/
-chmod +x -R /mnt/root/archlinux_manager
+git clone https://github.com/KMontasir/archlinux_manager.git /root/
+chmod +x -R /root/archlinux_manager
 echo "alias arch-manager=/root/archlinux_manager/arch_ez.sh" >> /etc/bash.bashrc
 EOF
 
