@@ -162,8 +162,8 @@ install_base_system() {
     mount ${FC_DISK}1 /mnt/boot
   fi
 
-  pacstrap /mnt base linux linux-firmware grub archlinux-keyring || { echo "Erreur : Échec de l'installation de la base."; exit 1; }
-  pacstrap /mnt bash-completion nano openssh sudo || { echo "Erreur : Échec des installations facultatives."; exit 1; }
+  pacstrap /mnt base linux linux-firmware grub archlinux-keyring || { echo "Erreur : Échec des installations de base."; exit 1; }
+  pacstrap /mnt bash-completion nano openssh sudo git || { echo "Erreur : Échec des installations facultatives."; exit 1; }
   
   # Vérifier si le système est en mode UEFI
   if [ "$FC_PARTITION_TABLE_TYPE" = "gpt" ]; then
@@ -217,6 +217,10 @@ configure_system() {
   systemctl enable systemd-networkd.service
   systemctl enable systemd-resolved.service
   systemctl enable sshd.service
+
+  git clone https://github.com/KMontasir/archlinux_manager.git /root/
+  chmod +x -R  /root/archlinux_manager
+  echo "alias arch-manager=/root/archlinux_manager/arch_ez.sh" >> /etc/bash.bashrc
 EOF
 
   echo "Configuration du système terminée."
