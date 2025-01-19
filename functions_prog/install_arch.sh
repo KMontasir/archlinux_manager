@@ -199,10 +199,10 @@ configure_system() {
 # Ajout du shell "nologin" permettant d'empêcher un utilisateur de se connecter via un shell SSH ou de la console directe
   echo "/usr/sbin/nologin" | tee -a /etc/shells
 	
-# Personnaliser le PROMPT
+# Personnaliser le PROMPT (en dev)
  #sed -i 's|^PS1=.*|PS1=$FC_PS1|' /etc/bash.bashrc
  #sed -i 's|^PS1=.*|PS1="'"$FC_PS1"'"|' /etc/bash.bashrc
- sed -i "s|^PS1=.*|PS1=\"$FC_PS1\"|" /etc/bash.bashrc
+ #sed -i "s|^PS1=.*|PS1=\"$FC_PS1\"|" /etc/bash.bashrc
 	
 # Personnaliser LS et GREP
   echo $FC_COLOR_LS_GREP >> /etc/bash.bashrc
