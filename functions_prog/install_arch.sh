@@ -47,8 +47,10 @@ configure_network() {
   ls /etc/systemd/network/*.network 2>/dev/null | nl
 
   # Nom du fichier réseau dans le système live et installé
-  CONFIG_FILE="/etc/systemd/network/20-$INTERFACE.network"
-  CONFIG_FILE_MNT="/mnt/etc/systemd/network/20-$INTERFACE.network"
+  CONFIG_FILE="/etc/systemd/network/$INTERFACE.network"
+  CONFIG_FILE_MNT="/mnt/$CONFIG_FILE"
+  mkdir -p /mnt/etc/systemd/network/
+  touch $CONFIG_FILE_MNT
 
   # Créer la configuration réseau
   if [ "$FC_USE_DHCP" = true ]; then
