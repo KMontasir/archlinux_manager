@@ -235,6 +235,17 @@ EOF
   mkdir -p /mnt/$(dirname $CONFIG_FILE)
   cp "$CONFIG_FILE_MNT" "/mnt/$CONFIG_FILE"
 
+  # Copier un répertoire de l'environnement live vers l'installation
+  echo "Copie du répertoire requis vers l'installation..."
+  SOURCE_DIR="/path/to/source_directory"  # Remplacez par le chemin du répertoire à copier
+  DEST_DIR="/mnt/path/to/destination_directory"  # Chemin dans l'installation cible
+  if [ -d "$SOURCE_DIR" ]; then
+    cp -r "$SOURCE_DIR" "$DEST_DIR"
+    echo "Répertoire $SOURCE_DIR copié vers $DEST_DIR."
+  else
+    echo "Erreur : Le répertoire $SOURCE_DIR n'existe pas."
+  fi
+
   echo "Configuration du système terminée."
 }
 
