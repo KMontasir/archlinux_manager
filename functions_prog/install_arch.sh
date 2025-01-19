@@ -140,9 +140,9 @@ prepare_disks() {
   swapon ${FC_DISK}2 || { echo "Erreur : Impossible d'activer la partition Swap."; exit 1; }
 
   echo "Préparation des disques terminée."
-	lsblk
-	echo "Appuyez sur Entrée pour continuer ou Ctrl+C pour quitter"
-	read
+  lsblk
+  echo "Appuyez sur Entrée pour continuer ou Ctrl+C pour quitter"
+  read
 }
 
 # 3. Installation du système de base et facultatif avec vérifications
@@ -180,33 +180,34 @@ configure_system() {
 
   arch-chroot /mnt /bin/bash <<EOF
 # Configurer/Synchoniser l'horloge
-	ln -sf /usr/share/zoneinfo/$FC_TIMEZONE /etc/localtime
+  ln -sf /usr/share/zoneinfo/$FC_TIMEZONE /etc/localtime
   hwclock --systohc
 	
 # Configurer la langue et le clavier
   echo "$FC_LOCALE" > /etc/locale.gen
   locale-gen
   echo "FC_LANG=$LANG" > /etc/locale.conf
-	echo KEYMAP=$FC_KEYMAP > /etc/vconsole.conf
+  echo KEYMAP=$FC_KEYMAP > /etc/vconsole.conf
 	
 # Ajouter le nom d'hôte
   echo "$FC_HOSTNAME" > /etc/hostname
 	
 # Créer l'utilisateur SUDO
-	useradd -m -G wheel $FC_USERSUDO
-	sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+  useradd -m -G wheel $FC_USERSUDO
+  sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 	
 # Ajout du shell "nologin" permettant d'empêcher un utilisateur de se connecter via un shell SSH ou de la console directe
-	echo "/usr/sbin/nologin" | tee -a /etc/shells
+  echo "/usr/sbin/nologin" | tee -a /etc/shells
 	
 # Personnaliser le PROMPT
-	sed -i 's|^PS1=.*|PS1=$FC_PS1|' /etc/bash.bashrc
+ #sed -i 's|^PS1=.*|PS1=$FC_PS1|' /etc/bash.bashrc
+ sed -i 's|^PS1=.*|PS1="'"$FC_PS1"'"|' /etc/bash.bashrc
 	
 # Personnaliser LS et GREP
-	echo $FC_COLOR_LS_GREP >> /etc/bash.bashrc
+  echo $FC_COLOR_LS_GREP >> /etc/bash.bashrc
 	
 # Personnaliser les couleurs pour les script .sh avec nano
-	echo $FC_COLOR_NANO_BASH >> /etc/nanorc
+  echo $FC_COLOR_NANO_BASH >> /etc/nanorc
 	
 # Lier resolv.conf à systemd-resolved si besoins
   #ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
@@ -214,7 +215,7 @@ configure_system() {
 # Activer les services aux démarrage
   systemctl enable systemd-networkd.service
   systemctl enable systemd-resolved.service
-	systemctl enable sshd.service
+  systemctl enable sshd.service
 EOF
 
   echo "Configuration du système terminée."
