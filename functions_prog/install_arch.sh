@@ -177,7 +177,7 @@ configure_system() {
   arch-chroot /mnt /bin/bash <<EOF
 set -e
 
-# Configurer/Synchoniser l'horloge
+# Configurer/Synchroniser l'horloge
 ln -sf /usr/share/zoneinfo/$FC_TIMEZONE /etc/localtime
 hwclock --systohc
 
@@ -203,16 +203,37 @@ echo "$FC_COLOR_LS_GREP" >> /etc/bash.bashrc
 # Personnaliser les couleurs pour nano
 echo "$FC_COLOR_NANO_BASH" >> /etc/nanorc
 
+# Créer la configuration réseau
+cat <<EON > $CONFIG_FILE
+[Match]
+Name=$FC_NIC
+
+[Network]
+Address=$FC_IP_ADDRESS/$FC_CIDR
+Gateway=$FC_GATEWAY
+DNS=$FC_DNS
+EON
+
+# Vérifier que la configuration réseau est persistée
+if [ ! -f $CONFIG_FILE ]; then
+  echo "Erreur : Le fichier réseau $CONFIG_FILE n'a pas été créé correctement."
+  exit 1
+fi
+
 # Activer les services au démarrage
 systemctl enable systemd-networkd.service
 systemctl enable systemd-resolved.service
 systemctl enable sshd.service
 
-# Intégrer Archlinux-Manager en tant que commande
-git clone https://github.com/KMontasir/archlinux_manager.git /root/
-chmod +x -R /root/archlinux_manager
-echo "alias arch-manager=/root/archlinux_manager/arch_ez.sh" >> /etc/bash.bashrc
+# Redémarrer les services pour appliquer les changements
+systemctl restart systemd-networkd.service
+systemctl restart systemd-resolved.service
 EOF
+
+  # Synchronisation de la configuration réseau avec le système cible
+  echo "Synchronisation des fichiers réseau..."
+  mkdir -p /mnt/$(dirname $CONFIG_FILE)
+  cp "$CONFIG_FILE_MNT" "/mnt/$CONFIG_FILE"
 
   echo "Configuration du système terminée."
 }
