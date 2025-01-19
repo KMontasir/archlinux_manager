@@ -177,13 +177,6 @@ install_base_system() {
 configure_system() {
   echo "Configuration du système..."
   
-  # Assurez-vous que les systèmes de fichiers sont montés correctement
-  mount --types proc /proc /mnt/proc
-  mount --rbind /sys /mnt/sys
-  mount --rbind /dev /mnt/dev
-  mount --make-rslave /mnt/dev
-  mount --rbind /run /mnt/run
-  
   # Configurer le mot de passe root
   echo "root:$root_password" | arch-chroot /mnt chpasswd
 
@@ -218,16 +211,25 @@ echo "$FC_COLOR_LS_GREP" >> /etc/bash.bashrc
 echo "$FC_COLOR_NANO_BASH" >> /etc/nanorc
 
 # Configuration réseau
-ip addr add $FC_IP_ADDRESS/$FC_CIDR dev $FC_NIC
-ip link set $FC_NIC up
-ip route add default via $FC_GATEWAY
-ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
-echo "nameserver $FC_DNS" > /etc/resolv.conf
+mkdir -p /etc/systemd/network/$FC_NIC.network
+echo "
+[Match]
+Name=$FC_NIC
+[Network]
+Address=$FC_IP_ADDRESS/$FC_CIDR
+Gateway=$FC_GATEWAY
+DNS=$FC_DNS
+" > /etc/systemd/network/$FC_NIC.network
 
 # Activer les services au démarrage
 systemctl enable systemd-networkd.service
 systemctl enable systemd-resolved.service
 systemctl enable sshd.service
+
+# Redémarrer les services
+systemctl restart systemd-networkd.service
+systemctl restart systemd-resolved.service
+systemctl restart sshd.service
 
 # Intégrer Archlinux-Manager en tant que commande
 git clone https://github.com/KMontasir/archlinux_manager.git /root/
