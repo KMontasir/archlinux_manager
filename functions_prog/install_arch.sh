@@ -218,6 +218,7 @@ configure_system() {
   systemctl enable systemd-resolved.service
   systemctl enable sshd.service
 
+# Intégrer Archlinux-Manager en tant que commande
   git clone https://github.com/KMontasir/archlinux_manager.git /root/
   chmod +x -R  /root/archlinux_manager
   echo "alias arch-manager=/root/archlinux_manager/arch_ez.sh" >> /etc/bash.bashrc
