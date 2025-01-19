@@ -211,15 +211,13 @@ echo "$FC_COLOR_LS_GREP" >> /etc/bash.bashrc
 echo "$FC_COLOR_NANO_BASH" >> /etc/nanorc
 
 # Configuration réseau
-mkdir -p /etc/systemd/network/$FC_NIC.network
-echo "
-[Match]
+mkdir -p /etc/systemd/network/
+echo "[Match]
 Name=$FC_NIC
 [Network]
 Address=$FC_IP_ADDRESS/$FC_CIDR
 Gateway=$FC_GATEWAY
-DNS=$FC_DNS
-" > /etc/systemd/network/$FC_NIC.network
+DNS=$FC_DNS" > /etc/systemd/network/$FC_NIC.network
 
 # Activer les services au démarrage
 systemctl enable systemd-networkd.service
