@@ -229,8 +229,8 @@ systemctl restart systemd-resolved.service
 systemctl restart sshd.service
 
 # Intégrer Archlinux-Manager en tant que commande
-git clone https://github.com/KMontasir/archlinux_manager.git /root/
-chmod +x -R /root/archlinux_manager
+git clone https://github.com/KMontasir/archlinux_manager.git /mnt/root/
+chmod +x -R /mnt/root/archlinux_manager
 echo "alias arch-manager=/root/archlinux_manager/arch_ez.sh" >> /etc/bash.bashrc
 EOF
 
