@@ -211,7 +211,6 @@ echo "$FC_COLOR_LS_GREP" >> /etc/bash.bashrc
 echo "$FC_COLOR_NANO_BASH" >> /etc/nanorc
 
 # Configuration réseau
-mkdir -p /etc/systemd/network/
 echo "[Match]
 Name=$FC_NIC
 [Network]
