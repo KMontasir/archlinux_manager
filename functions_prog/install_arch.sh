@@ -217,7 +217,7 @@ Name=$FC_NIC
 [Network]
 Address=$FC_IP_ADDRESS/$FC_CIDR
 Gateway=$FC_GATEWAY
-DNS=$FC_DNS" > /etc/systemd/network/$FC_NIC.network
+DNS=$FC_DNS" > /mnt/etc/systemd/network/$FC_NIC.network
 
 # Activer les services au démarrage
 systemctl enable systemd-networkd.service
