@@ -47,10 +47,16 @@ configure_network() {
   ls /etc/systemd/network/*.network 2>/dev/null | nl
 
   # Nom du fichier réseau dans le système live et installé
-  CONFIG_FILE="/etc/systemd/network/$INTERFACE.network"
-  CONFIG_FILE_MNT="/mnt/$CONFIG_FILE"
-  mkdir -p /mnt/etc/systemd/network/
+  CONFIG_DIR="/etc/systemd/network"
+  CONFIG_DIR_MNT="/mnt/etc/systemd/network"
+  CONFIG_FILE="$CONFIG_DIR/$INTERFACE.network"
+  CONFIG_FILE_MNT="$CONFIG_DIR_MNT/$INTERFACE.network"
+  mkdir -p $CONFIG_DIR_MNT
   touch $CONFIG_FILE_MNT
+
+  # Supprimer les fichiers de configuration réseau
+  echo "Suppression des fichiers de configuration réseau existant"
+  rm $CONFIG_DIR/*
 
   # Créer la configuration réseau
   if [ "$FC_USE_DHCP" = true ]; then
