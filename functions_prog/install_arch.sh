@@ -176,56 +176,63 @@ install_base_system() {
 # 4. Configuration du système après installation
 configure_system() {
   echo "Configuration du système..."
+  
+  # Assurez-vous que les systèmes de fichiers sont montés correctement
+  mount --types proc /proc /mnt/proc
+  mount --rbind /sys /mnt/sys
+  mount --rbind /dev /mnt/dev
+  mount --make-rslave /mnt/dev
+  mount --rbind /run /mnt/run
+  
+  # Configurer le mot de passe root
   echo "root:$root_password" | arch-chroot /mnt chpasswd
 
+  # Chroot dans l'installation Arch
   arch-chroot /mnt /bin/bash <<EOF
+set -e
+
 # Configurer/Synchoniser l'horloge
-  ln -sf /usr/share/zoneinfo/$FC_TIMEZONE /etc/localtime
-  hwclock --systohc
-	
+ln -sf /usr/share/zoneinfo/$FC_TIMEZONE /etc/localtime
+hwclock --systohc
+
 # Configurer la langue et le clavier
-  echo "$FC_LOCALE" > /etc/locale.gen
-  locale-gen
-  echo "FC_LANG=$LANG" > /etc/locale.conf
-  echo KEYMAP=$FC_KEYMAP > /etc/vconsole.conf
-	
+echo "$FC_LOCALE" > /etc/locale.gen
+locale-gen
+echo "FC_LANG=$LANG" > /etc/locale.conf
+echo "KEYMAP=$FC_KEYMAP" > /etc/vconsole.conf
+
 # Ajouter le nom d'hôte
-  echo "$FC_HOSTNAME" > /etc/hostname
-	
+echo "$FC_HOSTNAME" > /etc/hostname
+
 # Créer l'utilisateur SUDO
-  useradd -m -G wheel $FC_USERSUDO
-  sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
-	
-# Ajout du shell "nologin" permettant d'empêcher un utilisateur de se connecter via un shell SSH ou de la console directe
-  echo "/usr/sbin/nologin" | tee -a /etc/shells
-	
-# Personnaliser le PROMPT (en dev)
- #sed -i 's|^PS1=.*|PS1=$FC_PS1|' /etc/bash.bashrc
- #sed -i 's|^PS1=.*|PS1="'"$FC_PS1"'"|' /etc/bash.bashrc
- #sed -i "s|^PS1=.*|PS1=\"$FC_PS1\"|" /etc/bash.bashrc
-	
+useradd -m -G wheel $FC_USERSUDO
+sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+
+# Ajout du shell "nologin"
+echo "/usr/sbin/nologin" | tee -a /etc/shells
+
 # Personnaliser LS et GREP
-  echo $FC_COLOR_LS_GREP >> /etc/bash.bashrc
-	
-# Personnaliser les couleurs pour les script .sh avec nano
-  echo $FC_COLOR_NANO_BASH >> /etc/nanorc
-	
+echo "$FC_COLOR_LS_GREP" >> /etc/bash.bashrc
+
+# Personnaliser les couleurs pour nano
+echo "$FC_COLOR_NANO_BASH" >> /etc/nanorc
+
 # Configuration réseau
-  ip addr add $FC_IP_ADDRESS/$FC_CIDR dev $FC_NIC
-  ip link set FC_NIC up
-  ip route add default via $FC_GATEWAY
-  ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
-  echo "nameserver $FC_DNS" > /etc/resolv.conf
-	
-# Activer les services aux démarrage
-  systemctl enable systemd-networkd.service
-  systemctl enable systemd-resolved.service
-  systemctl enable sshd.service
+ip addr add $FC_IP_ADDRESS/$FC_CIDR dev $FC_NIC
+ip link set $FC_NIC up
+ip route add default via $FC_GATEWAY
+ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+echo "nameserver $FC_DNS" > /etc/resolv.conf
+
+# Activer les services au démarrage
+systemctl enable systemd-networkd.service
+systemctl enable systemd-resolved.service
+systemctl enable sshd.service
 
 # Intégrer Archlinux-Manager en tant que commande
-  git clone https://github.com/KMontasir/archlinux_manager.git /root/
-  chmod +x -R  /root/archlinux_manager
-  echo "alias arch-manager=/root/archlinux_manager/arch_ez.sh" >> /etc/bash.bashrc
+git clone https://github.com/KMontasir/archlinux_manager.git /root/
+chmod +x -R /root/archlinux_manager
+echo "alias arch-manager=/root/archlinux_manager/arch_ez.sh" >> /etc/bash.bashrc
 EOF
 
   echo "Configuration du système terminée."
