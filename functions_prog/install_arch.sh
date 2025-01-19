@@ -120,7 +120,7 @@ prepare_disks() {
 
   # Partition 2 : Swap
   echo "Création de la partition swap sur $FC_DISK..."
-  parted -s $FC_FC_DISK mkpart primary linux-swap $FC_PART2_START $FC_PART2_END || { echo "Erreur : Impossible de créer la partition Swap."; exit 1; }
+  parted -s $FC_DISK mkpart primary linux-swap $FC_PART2_START $FC_PART2_END || { echo "Erreur : Impossible de créer la partition Swap."; exit 1; }
   echo "Formatage de la partition ${FC_DISK}2..."
   mkswap ${FC_DISK}2 || { echo "Erreur : Impossible de formater la partition Swap."; exit 1; }
 
