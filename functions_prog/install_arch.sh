@@ -210,8 +210,12 @@ configure_system() {
 # Personnaliser les couleurs pour les script .sh avec nano
   echo $FC_COLOR_NANO_BASH >> /etc/nanorc
 	
-# Lier resolv.conf à systemd-resolved si besoins
-  #ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+# Configuration réseau
+  ip addr add $FC_IP_ADDRESS/$FC_CIDR dev $FC_NIC
+  ip link set FC_NIC up
+  ip route add default via $FC_GATEWAY
+  ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+  echo "nameserver $FC_DNS" > /etc/resolv.conf
 	
 # Activer les services aux démarrage
   systemctl enable systemd-networkd.service
