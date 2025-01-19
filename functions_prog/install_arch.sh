@@ -201,7 +201,8 @@ configure_system() {
 	
 # Personnaliser le PROMPT
  #sed -i 's|^PS1=.*|PS1=$FC_PS1|' /etc/bash.bashrc
- sed -i 's|^PS1=.*|PS1="'"$FC_PS1"'"|' /etc/bash.bashrc
+ #sed -i 's|^PS1=.*|PS1="'"$FC_PS1"'"|' /etc/bash.bashrc
+ sed -i "s|^PS1=.*|PS1=\"$FC_PS1\"|" /etc/bash.bashrc
 	
 # Personnaliser LS et GREP
   echo $FC_COLOR_LS_GREP >> /etc/bash.bashrc
