@@ -248,6 +248,7 @@ install_arch() {
 	install_base_system
 	configure_system
 	install_bootloader
+ 	umount -l /run/archiso/bootmnt
 	
 	echo "Programme d'installation terminée."
 	echo "	1. Redémarrez la machine, puis connectez-vous en tant que root"
