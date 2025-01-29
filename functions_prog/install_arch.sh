@@ -114,7 +114,7 @@ prepare_disks() {
     parted -s $FC_DISK mkpart primary fat32 $FC_PART1_START $FC_PART1_END || { echo "Erreur : Impossible de créer la partition MSDOS."; exit 1; }
     parted -s $FC_DISK set 1 esp on || { echo "Erreur : Impossible de définir la partition 1 comme partition MSDOS."; exit 1; }
     echo "Formatage de la partition ${FC_DISK}1..."
-    mkfs.ext4 ${FC_DISK}4 || { echo "Erreur : Impossible de formater la partition MSDOS."; exit 1; }
+    mkfs.ext4 ${FC_DISK}1 || { echo "Erreur : Impossible de formater la partition MSDOS."; exit 1; }
   fi
 
   # Partition 2 : Swap
